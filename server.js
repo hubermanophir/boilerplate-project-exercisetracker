@@ -40,13 +40,22 @@ app.get("/", (req, res) => {
 app.post("/api/exercise/new-user", async (req, res) => {
   const body = req.body;
   const userName = body.username;
-  const user = await User.find({ username: userName });
+  let user;
+  try {
+    user = await User.find({ username: userName });
+  } catch (err) {
+    return res.status(500).send("Internal server error");
+  }
   if (user[0] === undefined) {
     const newUser = new User({
       username: userName,
       count: 0,
     });
-    await newUser.save();
+    try {
+      await newUser.save();
+    } catch (err) {
+      return res.status(500).send("Internal server error");
+    }
     const id = newUser._id;
     const username = newUser.username;
     const obj = {
@@ -61,7 +70,12 @@ app.post("/api/exercise/new-user", async (req, res) => {
 });
 
 app.get("/api/exercise/users", async (req, res) => {
-  const userArray = await User.find({});
+  let userArray;
+  try {
+    userArray = await User.find({});
+  } catch (err) {
+    return res.status(500).send("Internal server error");
+  }
   res.json(userArray);
 });
 
@@ -76,11 +90,20 @@ app.post("/api/exercise/add", async (req, res) => {
   }
   exercise.duration = body.duration;
   exercise.description = body.description;
-  await User.findByIdAndUpdate(body.userId, {
-    $push: { log: exercise },
-    $inc: { count: 1 },
-  });
-  const user = await User.findById(body.userId);
+  try {
+    await User.findByIdAndUpdate(body.userId, {
+      $push: { log: exercise },
+      $inc: { count: 1 },
+    });
+  } catch (err) {
+    return res.status(500).send("Internal server error");
+  }
+  let user;
+  try {
+    user = await User.findById(body.userId);
+  } catch (err) {
+    return res.status(500).send("Internal server error");
+  }
   const id = user._id;
   outputObject.username = user.username;
   outputObject.description = exercise.description;
@@ -92,7 +115,12 @@ app.post("/api/exercise/add", async (req, res) => {
 
 app.get("/api/exercise/log", async (req, res) => {
   const query = req.query;
-  const user = await User.findById(query.userId);
+  let user;
+  try {
+    user = await User.findById(query.userId);
+  } catch (err) {
+    return res.status(500).send("Internal server error");
+  }
   const { log } = user;
   let filtered;
   filtered = log;
