@@ -106,16 +106,17 @@ app.get("/api/exercise/log", async (req, res) => {
   if (!query.userId) {
     return res.status(400).send("userId required");
   }
+
   if (query.to) {
     filtered = filtered.filter((element) => {
-      if (element.date < query.to) {
+      if (element.date < new Date(query.to)) {
         return element;
       }
     });
   }
   if (query.from) {
     filtered = filtered.filter((element) => {
-      if (element.date > query.from) {
+      if (element.date > new Date(query.from)) {
         return element;
       }
     });
