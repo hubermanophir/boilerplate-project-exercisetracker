@@ -26,6 +26,13 @@ mongoose
   )
   .then(() => console.log("Connected Successfully to Mongoose atlas"));
 
+const options = {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
+
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
@@ -67,7 +74,7 @@ app.post("/api/exercise/add", async (req, res) => {
     username: user.username,
   };
   if (body.date === "") {
-    exercise.date = new Date();
+    exercise.date = new Date().toLocaleDateString("en-US", options);
   } else {
     exercise.date = body.date;
   }
