@@ -86,8 +86,22 @@ app.post("/api/exercise/add", async (req, res) => {
   outputObject.description = exercise.description;
   outputObject.duration = Number(exercise.duration);
   outputObject._id = mongoose.Types.ObjectId(id);
-  outputObject.date = exercise.date;
+  outputObject.date = exercise.date.toDateString();
   res.json(outputObject);
+});
+
+app.get("/api/exercise/log", async (req, res) => {
+  const query = req.query;
+  if (!query.userId) {
+    return res.status(400).send("Query params must include user id ");
+  }
+  if (query.from && query.to && query.limit) {
+    const user = await User.findById(query.userId);
+    const { log } = user;
+    log.sort(function (a, b) {
+      return new Date(a.date) - new Date(b.date);
+    });
+  }
 });
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
