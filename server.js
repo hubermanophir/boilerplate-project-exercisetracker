@@ -71,7 +71,7 @@ app.post("/api/exercise/add", async (req, res) => {
   } else {
     exercise.date = body.date;
   }
-  exercise.duration = body.duration;
+  exercise.duration = Number(body.duration);
   exercise.description = body.description;
   res.json(exercise);
 });
