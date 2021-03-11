@@ -99,7 +99,26 @@ app.get("/api/exercise/log", async (req, res) => {
     const user = await User.findById(query.userId);
     const { log } = user;
     log.sort(function (a, b) {
-      return new Date(a.date) - new Date(b.date);
+      return a.date.localeCompare(b.date);
+    });
+    log.forEach((element) => {
+      if (
+        element.date.getTime() > query.from.getTime() &&
+        element.date.getTime() < query.to.getTime()
+      ) {
+        return element;
+      }
+    });
+
+    const limitLogs = [];
+    for (let i = 0; i < query.limit; i++) {
+      limitLogs.push(log[i]);
+    }
+    return res.status(200).json({
+      _id: user.id,
+      username: user.username,
+      count: user.count,
+      log: limitLogs,
     });
   }
 });
