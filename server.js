@@ -77,7 +77,7 @@ app.post("/api/exercise/add", async (req, res) => {
   exercise.duration = body.duration;
   exercise.description = body.description;
   await User.findByIdAndUpdate(body.userId, { $push: { log: exercise } });
-  await User.findByIdAndUpdate(body.userId, { $inc: { counter: 1 } });
+  await User.update({ _id: body.userId }, { $inc: { counter: 1 } });
   const user = await User.findById(body.userId);
   const id = user._id;
   outputObject.username = user.username;
