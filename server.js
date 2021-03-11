@@ -78,11 +78,11 @@ app.post("/api/exercise/add", async (req, res) => {
   await User.findByIdAndUpdate(body.userId, { $push: { exercises: exercise } });
   const user = await User.findById(body.userId);
   const id = user._id;
-  outputObject._id = id;
   outputObject.username = user.username;
-  outputObject.date = exercise.date;
-  outputObject.duration = Number(exercise.duration);
   outputObject.description = exercise.description;
+  outputObject.duration = Number(exercise.duration);
+  outputObject._id = id;
+  outputObject.date = exercise.date;
   res.json(outputObject);
 });
 
