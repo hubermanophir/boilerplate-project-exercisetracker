@@ -122,22 +122,25 @@ app.get("/api/exercise/log", async (req, res) => {
   }
 
   if (query.limit) {
-    let temp = [];
+    const temp = [];
     for (let i = 0; i < Number(query.limit); i++) {
       temp.push(filtered[i]);
     }
     filtered = temp;
   }
+  const temp = [];
   for (const item of filtered) {
-    delete item._id;
-    console.log(item);
+    temp.push({
+      description: item.description,
+      duration: item.duration,
+      date: item.date.toDateString(),
+    });
   }
-  // console.log(filtered);
-
+  filtered = temp;
   const object = {
     _id: mongoose.Types.ObjectId(user._id),
     username: user.username,
-    count: Number(filtered.length),
+    count: filtered.length,
     log: filtered,
   };
   return res.status(200).json(object);
