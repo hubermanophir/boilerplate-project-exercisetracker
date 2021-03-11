@@ -92,35 +92,55 @@ app.post("/api/exercise/add", async (req, res) => {
 
 app.get("/api/exercise/log", async (req, res) => {
   const query = req.query;
+  const user = await User.findById(query.userId);
+  const { log } = user;
+  let filtered;
+  filtered = log;
+
+  filtered.sort(function (a, b) {
+    let dateA = a.date,
+      dateB = b.date;
+    return dateA - dateB;
+  });
+
   if (!query.userId) {
-    return res.status(400).send("Query params must include user id ");
+    return res.status(400).send("userId required");
   }
-  if (query.from && query.to && query.limit) {
-    const user = await User.findById(query.userId);
-    const { log } = user;
-    log.sort(function (a, b) {
-      return a.date.localeCompare(b.date);
-    });
-    log.forEach((element) => {
-      if (
-        element.date.getTime() > query.from.getTime() &&
-        element.date.getTime() < query.to.getTime()
-      ) {
+  if (query.to) {
+    filtered = filtered.filter((element) => {
+      if (element.date < query.to) {
         return element;
       }
     });
-
-    const limitLogs = [];
-    for (let i = 0; i < query.limit; i++) {
-      limitLogs.push(log[i]);
-    }
-    return res.status(200).json({
-      _id: user.id,
-      username: user.username,
-      count: user.count,
-      log: limitLogs,
+  }
+  if (query.from) {
+    filtered = filtered.filter((element) => {
+      if (element.date > query.from) {
+        return element;
+      }
     });
   }
+
+  if (query.limit) {
+    let temp = [];
+    for (let i = 0; i < Number(query.limit); i++) {
+      temp.push(filtered[i]);
+    }
+    filtered = temp;
+  }
+  for (const item of filtered) {
+    delete item._id;
+    console.log(item);
+  }
+  // console.log(filtered);
+
+  const object = {
+    _id: mongoose.Types.ObjectId(user._id),
+    username: user.username,
+    count: Number(filtered.length),
+    log: filtered,
+  };
+  return res.status(200).json(object);
 });
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
