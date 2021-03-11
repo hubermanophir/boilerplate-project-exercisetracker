@@ -38,22 +38,15 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/exercise/new-user", async (req, res) => {
+  const body = req.body;
   const userName = body.username;
-  try {
-    const user = await User.find({ username: userName });
-  } catch (err) {
-    return res.status(500).send("internal error");
-  }
+  const user = await User.find({ username: userName });
   if (user[0] === undefined) {
     const newUser = new User({
       username: userName,
       count: 0,
     });
-    try {
-      await newUser.save();
-    } catch (err) {
-      return res.status(500).send("internal error");
-    }
+    await newUser.save();
     const id = newUser._id;
     const username = newUser.username;
     const obj = {
@@ -74,13 +67,6 @@ app.get("/api/exercise/users", async (req, res) => {
 
 app.post("/api/exercise/add", async (req, res) => {
   const body = req.body;
-  if (body.userId === "") {
-    return res.status(400).send("User id required ");
-  } else if (body.description === "") {
-    return res.status(400).send("Description is needed ");
-  } else if (body.duration === "") {
-    return res.status(400).send("Duration required");
-  }
   const exercise = {};
   const outputObject = {};
   if (body.date === "") {
