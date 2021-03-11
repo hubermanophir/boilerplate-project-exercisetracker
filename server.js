@@ -9,11 +9,13 @@ const User = require("./models/user");
 const { json } = require("body-parser");
 const { find } = require("./models/user");
 
+//----------------------------------middleware-----------------------------------------------
 app.use(cors());
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(json());
 
+//connecting to database
 mongoose
   .connect(
     "mongodb+srv://hubermanophir:Password123@testcluster.oqqu5.mongodb.net/ExerciseTracker?retryWrites=true&w=majority",
@@ -26,17 +28,14 @@ mongoose
   )
   .then(() => console.log("Connected Successfully to Mongoose atlas"));
 
-const options = {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-};
+//-------------------------------------Routes---------------------------------------------
 
+//loading static HTML page
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
 
+//Making a new user
 app.post("/api/exercise/new-user", async (req, res) => {
   const body = req.body;
   const userName = body.username;
@@ -69,6 +68,7 @@ app.post("/api/exercise/new-user", async (req, res) => {
   }
 });
 
+//Get a specific user
 app.get("/api/exercise/users", async (req, res) => {
   let userArray;
   try {
@@ -79,6 +79,7 @@ app.get("/api/exercise/users", async (req, res) => {
   res.json(userArray);
 });
 
+//Adding a new exercise to a user
 app.post("/api/exercise/add", async (req, res) => {
   const body = req.body;
   const exercise = {};
@@ -113,6 +114,7 @@ app.post("/api/exercise/add", async (req, res) => {
   res.json(outputObject);
 });
 
+//Getting the user and all his exercises
 app.get("/api/exercise/log", async (req, res) => {
   const query = req.query;
   let user;
@@ -175,6 +177,8 @@ app.get("/api/exercise/log", async (req, res) => {
   };
   return res.status(200).json(object);
 });
+
+//------------------------------App-Listen---------------------------------------------
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
 });
