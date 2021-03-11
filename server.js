@@ -5,7 +5,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 require("dotenv").config();
 const User = require("./models/user");
-const Exercise = require("./models/exercise");
+// const Exercise = require("./models/exercise");
 const { json } = require("body-parser");
 const { find } = require("./models/user");
 
@@ -66,21 +66,24 @@ app.get("/api/exercise/users", async (req, res) => {
 
 app.post("/api/exercise/add", async (req, res) => {
   const body = req.body;
-  const id = body.userId;
-  const user = await User.findById(id);
-  console.log(user);
-  const exercise = {
-    _id: user._id,
-    username: user.username,
-  };
+  const exercise = {};
+  const outputObject = {};
   if (body.date === "") {
-    exercise.date = new Date().toLocaleDateString("en-US", options);
+    exercise.date = new Date();
   } else {
     exercise.date = body.date;
   }
-  exercise.duration = Number(body.duration);
+  exercise.duration = body.duration;
   exercise.description = body.description;
-  res.json(exercise);
+  await User.findByIdAndUpdate(body.userId, { $push: { exercises: exercise } });
+  const user = await User.findById(body.userId);
+  const id = user._id;
+  outputObject._id = id;
+  outputObject.username = user.username;
+  outputObject.date = exercise.date;
+  outputObject.duration = Number(exercise.duration);
+  outputObject.description = exercise.description;
+  res.json(outputObject);
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {

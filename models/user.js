@@ -14,4 +14,19 @@ const UserSchema = new mongoose.Schema({
   ],
 });
 
+// const exercisesSchema = new mongoose.Schema({
+//   date: {
+//     type: Date,
+//     default: new Date(),
+//   },
+//   duration: {
+//     type: Number,
+//     required: true,
+//   },
+//   description: {
+//     type: String,
+//     required: true,
+//   },
+// });
+
 module.exports = mongoose.model("Users", UserSchema);
