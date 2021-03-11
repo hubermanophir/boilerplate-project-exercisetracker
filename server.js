@@ -77,17 +77,16 @@ app.post("/api/exercise/add", async (req, res) => {
   exercise.duration = body.duration;
   exercise.description = body.description;
   await User.findByIdAndUpdate(body.userId, { $push: { log: exercise } });
-  await User.update({ _id: body.userId }, { $inc: { counter: 1 } });
   const user = await User.findById(body.userId);
+  // await user.set({ counter: log.length });
   const id = user._id;
   outputObject.username = user.username;
   outputObject.description = exercise.description;
   outputObject.duration = Number(exercise.duration);
-  outputObject._id = id;
+  outputObject._id = mongoose.Types.ObjectId(id);
   outputObject.date = exercise.date;
   res.json(outputObject);
 });
-
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
 });
