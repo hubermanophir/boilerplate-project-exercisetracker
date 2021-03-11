@@ -5,28 +5,16 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  count: {
+    type: Number,
+  },
   log: [
     {
-      date: Date,
-      duration: Number,
       description: String,
+      duration: Number,
+      date: Date,
     },
   ],
 });
-
-// const exercisesSchema = new mongoose.Schema({
-//   date: {
-//     type: Date,
-//     default: new Date(),
-//   },
-//   duration: {
-//     type: Number,
-//     required: true,
-//   },
-//   description: {
-//     type: String,
-//     required: true,
-//   },
-// });
 
 module.exports = mongoose.model("Users", UserSchema);

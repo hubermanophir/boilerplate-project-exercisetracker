@@ -44,6 +44,7 @@ app.post("/api/exercise/new-user", async (req, res) => {
   if (user[0] === undefined) {
     const newUser = new User({
       username: userName,
+      count: 0,
     });
     await newUser.save();
     const id = newUser._id;
@@ -75,7 +76,8 @@ app.post("/api/exercise/add", async (req, res) => {
   }
   exercise.duration = body.duration;
   exercise.description = body.description;
-  await User.findByIdAndUpdate(body.userId, { $push: { exercises: exercise } });
+  await User.findByIdAndUpdate(body.userId, { $push: { log: exercise } });
+  await User.findByIdAndUpdate(body.userId, { $inc: { counter: 1 } });
   const user = await User.findById(body.userId);
   const id = user._id;
   outputObject.username = user.username;
