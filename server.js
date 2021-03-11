@@ -59,7 +59,7 @@ app.get("/api/exercise/users", async (req, res) => {
 app.post("/api/exercise/add", async (req, res) => {
   const body = req.body;
   let exercise;
-  if (!body.date) {
+  if (body.date !== "") {
     exercise = new Exercise({
       userId: body.userId,
       description: body.description,
@@ -69,14 +69,16 @@ app.post("/api/exercise/add", async (req, res) => {
   } else {
     exercise = new Exercise({
       userId: body.userId,
+      username: await User.findById(body.userId).username,
       description: body.description,
       duration: body.duration,
     });
   }
   await exercise.save();
   const obj = {};
-  const id = exercise._id;
-  const { username } = await Exercise.findById(id);
+  const id = exercise.userId;
+  const user = await User.findById(id);
+  const username = user.username;
   obj._id = id;
   obj.username = username;
   obj.date = exercise.date;
