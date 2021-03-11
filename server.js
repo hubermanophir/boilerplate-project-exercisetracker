@@ -7,6 +7,7 @@ require("dotenv").config();
 const User = require("./models/user");
 const Exercise = require("./models/exercise");
 const { json } = require("body-parser");
+const { find } = require("./models/user");
 
 app.use(cors());
 app.use(express.static("public"));
@@ -58,33 +59,21 @@ app.get("/api/exercise/users", async (req, res) => {
 
 app.post("/api/exercise/add", async (req, res) => {
   const body = req.body;
-  let exercise;
-  if (body.date !== "") {
-    exercise = new Exercise({
-      userId: body.userId,
-      description: body.description,
-      duration: body.duration,
-      date: body.date,
-    });
-  } else {
-    exercise = new Exercise({
-      userId: body.userId,
-      username: await User.findById(body.userId).username,
-      description: body.description,
-      duration: body.duration,
-    });
-  }
-  await exercise.save();
-  const obj = {};
-  const id = exercise.userId;
+  const id = body.userId;
   const user = await User.findById(id);
-  const username = user.username;
-  obj._id = id;
-  obj.username = username;
-  obj.date = exercise.date;
-  obj.duration = exercise.duration;
-  obj.description = exercise.description;
-  res.json(obj);
+  console.log(user);
+  const exercise = {
+    _id: user._id,
+    username: user.username,
+  };
+  if (body.date === "") {
+    exercise.date = new Date();
+  } else {
+    exercise.date = body.date;
+  }
+  exercise.duration = body.duration;
+  exercise.description = body.description;
+  res.json(exercise);
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
