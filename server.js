@@ -5,6 +5,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 require("dotenv").config();
 const User = require("./models/user");
+const Exercise = require("./models/exercise");
 const { json } = require("body-parser");
 
 app.use(cors());
@@ -53,6 +54,35 @@ app.post("/api/exercise/new-user", async (req, res) => {
 app.get("/api/exercise/users", async (req, res) => {
   const userArray = await User.find({});
   res.json(userArray);
+});
+
+app.post("/api/exercise/add", async (req, res) => {
+  const body = req.body;
+  let exercise;
+  if (!body.date) {
+    exercise = new Exercise({
+      userId: body.userId,
+      description: body.description,
+      duration: body.duration,
+      date: body.date,
+    });
+  } else {
+    exercise = new Exercise({
+      userId: body.userId,
+      description: body.description,
+      duration: body.duration,
+    });
+  }
+  await exercise.save();
+  const obj = {};
+  const id = exercise._id;
+  const { username } = await Exercise.findById(id);
+  obj._id = id;
+  obj.username = username;
+  obj.date = exercise.date;
+  obj.duration = exercise.duration;
+  obj.description = exercise.description;
+  res.json(obj);
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
