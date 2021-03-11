@@ -72,7 +72,7 @@ app.post("/api/exercise/add", async (req, res) => {
   if (body.date === "") {
     exercise.date = new Date();
   } else {
-    exercise.date = new Date(body.date.replace(/\//g, "_"));
+    exercise.date = new Date(body.date);
   }
   exercise.duration = body.duration;
   exercise.description = body.description;
