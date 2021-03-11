@@ -122,6 +122,7 @@ app.get("/api/exercise/log", async (req, res) => {
   }
 
   if (query.limit) {
+    query.limit = query.limit > filtered.length ? filtered.length : query.limit;
     const temp = [];
     for (let i = 0; i < Number(query.limit); i++) {
       temp.push(filtered[i]);
