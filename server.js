@@ -39,14 +39,30 @@ app.get("/", (req, res) => {
 
 app.post("/api/exercise/new-user", async (req, res) => {
   const body = req.body;
+  if (body.userId === "") {
+    return res.status(400).send("User id required ");
+  } else if (body.description === "") {
+    return res.status(400).send("Description is needed ");
+  } else if (body.duration === "") {
+    return res.status(400).send("Duration required");
+  }
   const userName = body.username;
-  const user = await User.find({ username: userName });
+
+  try {
+    const user = await User.find({ username: userName });
+  } catch (err) {
+    return res.status(500).send("internal error");
+  }
   if (user[0] === undefined) {
     const newUser = new User({
       username: userName,
       count: 0,
     });
-    await newUser.save();
+    try {
+      await newUser.save();
+    } catch (err) {
+      return res.status(500).send("internal error");
+    }
     const id = newUser._id;
     const username = newUser.username;
     const obj = {
@@ -76,9 +92,11 @@ app.post("/api/exercise/add", async (req, res) => {
   }
   exercise.duration = body.duration;
   exercise.description = body.description;
-  await User.findByIdAndUpdate(body.userId, { $push: { log: exercise } });
+  await User.findByIdAndUpdate(body.userId, {
+    $push: { log: exercise },
+    $inc: { count: 1 },
+  });
   const user = await User.findById(body.userId);
-  // await user.set({ counter: log.length });
   const id = user._id;
   outputObject.username = user.username;
   outputObject.description = exercise.description;
