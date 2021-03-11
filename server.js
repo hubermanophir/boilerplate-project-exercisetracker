@@ -5,10 +5,12 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 require("dotenv").config();
 const User = require("./models/user");
+const { json } = require("body-parser");
 
 app.use(cors());
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(json());
 
 mongoose
   .connect(
@@ -36,9 +38,11 @@ app.post("/api/exercise/new-user", async (req, res) => {
       userName: userName,
     });
     await newUser.save();
+    console.log(newUser._id);
+    const id = newUser._id;
     const obj = {
       username: newUser.userName,
-      _id: userName._id,
+      _id: id,
     };
     res.json(obj);
   } else {
