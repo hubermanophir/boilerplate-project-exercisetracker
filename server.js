@@ -38,7 +38,6 @@ app.post("/api/exercise/new-user", async (req, res) => {
       userName: userName,
     });
     await newUser.save();
-    console.log(newUser._id);
     const id = newUser._id;
     const obj = {
       username: newUser.userName,
@@ -48,6 +47,11 @@ app.post("/api/exercise/new-user", async (req, res) => {
   } else {
     res.status(400).send("Username already taken");
   }
+});
+
+app.get("/api/exercise/users", async (req, res) => {
+  const userArray = await User.find({});
+  res.json(userArray);
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
