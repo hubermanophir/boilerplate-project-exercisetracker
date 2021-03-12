@@ -176,7 +176,7 @@ app.get("/api/exercise/log", async (req, res) => {
 		temp.push({
 			description: item.description,
 			duration: item.duration,
-			date: item.date.toDateString(),
+			date: new Date(item.date).toDateString(),
 		});
 	}
 	filtered = temp;
