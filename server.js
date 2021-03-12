@@ -88,190 +88,105 @@ app.get("/api/exercise/users", async (req, res) => {
 });
 
 //Adding a new exercise to a user
-// app.post("/api/exercise/add", async (req, res) => {
-// 	const body = req.body;
-// 	const exercise = {};
-// 	const outputObject = {};
-// 	if (body.date === "") {
-// 		exercise.date = new Date();
-// 	} else {
-// 		exercise.date = new Date(body.date);
-// 	}
-// 	exercise.duration = body.duration;
-// 	exercise.description = body.description;
-// 	try {
-// 		await User.findByIdAndUpdate(body.userId, {
-// 			$push: { log: exercise },
-// 			$inc: { count: 1 },
-// 		});
-// 	} catch (err) {
-// 		return res.status(500).send("Internal server error");
-// 	}
-// 	let user;
-// 	try {
-// 		user = await User.findById(body.userId);
-// 	} catch (err) {
-// 		return res
-// 			.status(500)
-// 			.send("Internal server error, could not find user" + err);
-// 	}
-// 	const id = user._id;
-// 	outputObject.username = user.username;
-// 	outputObject.description = exercise.description;
-// 	outputObject.duration = Number(exercise.duration);
-// 	outputObject._id = mongoose.Types.ObjectId(id);
-// 	outputObject.date = exercise.date.toDateString();
-// 	res.json(outputObject);
-// });
-
-app.post(
-	"/api/exercise/add",
-	bodyParser.urlencoded({ extended: false }),
-	(request, response) => {
-		let newSession = new Session({
-			description: request.body.description,
-			duration: parseInt(request.body.duration),
-			date: request.body.date,
-		});
-
-		if (newSession.date === "") {
-			newSession.date = new Date().toISOString().substring(0, 10);
-		}
-
-		User.findByIdAndUpdate(
-			request.body.userId,
-			{ $push: { log: newSession } },
-			{ new: true },
-			(error, updatedUser) => {
-				if (!error) {
-					let responseObject = {};
-					responseObject["_id"] = updatedUser.id;
-					responseObject["username"] = updatedUser.username;
-					responseObject["date"] = new Date(
-						newSession.date
-					).toDateString();
-					responseObject["description"] = newSession.description;
-					responseObject["duration"] = newSession.duration;
-					response.json(responseObject);
-				}
-			}
-		);
+app.post("/api/exercise/add", async (req, res) => {
+	const body = req.body;
+	const exercise = {};
+	const outputObject = {};
+	if (body.date === "") {
+		exercise.date = new Date();
+	} else {
+		exercise.date = new Date(body.date);
 	}
-);
-
-//----------------------------------------------------
+	exercise.duration = body.duration;
+	exercise.description = body.description;
+	try {
+		await User.findByIdAndUpdate(body.userId, {
+			$push: { log: exercise },
+			$inc: { count: 1 },
+		});
+	} catch (err) {
+		return res.status(500).send("Internal server error");
+	}
+	let user;
+	try {
+		user = await User.findById(body.userId);
+	} catch (err) {
+		return res
+			.status(500)
+			.send("Internal server error, could not find user" + err);
+	}
+	const id = user._id;
+	outputObject.username = user.username;
+	outputObject.description = exercise.description;
+	outputObject.duration = Number(exercise.duration);
+	outputObject._id = mongoose.Types.ObjectId(id);
+	outputObject.date = exercise.date.toDateString();
+	res.json(outputObject);
+});
 
 //Getting the user and all his exercises
-// app.get("/api/exercise/log", async (req, res) => {
-// 	const query = req.query;
-// 	let user;
-// 	try {
-// 		user = await User.findById(query.userId);
-// 	} catch (err) {
-// 		return res.status(500).send("Internal server error");
-// 	}
-// 	const { log } = user;
-// 	let filtered;
-// 	filtered = log;
+app.get("/api/exercise/log", async (req, res) => {
+	const query = req.query;
+	let user;
+	try {
+		user = await User.findById(query.userId);
+	} catch (err) {
+		return res.status(500).send("Internal server error");
+	}
+	const { log } = user;
+	let filtered;
+	filtered = log;
 
-// 	filtered.sort(function (a, b) {
-// 		let dateA = a.date,
-// 			dateB = b.date;
-// 		return dateA - dateB;
-// 	});
-
-// 	if (!query.userId) {
-// 		return res.status(400).send("userId required");
-// 	}
-
-// 	if (query.to) {
-// 		filtered = filtered.filter((element) => {
-// 			if (element.date <= new Date(query.to)) {
-// 				return element;
-// 			}
-// 		});
-// 	}
-// 	if (query.from) {
-// 		filtered = filtered.filter((element) => {
-// 			if (element.date >= new Date(query.from)) {
-// 				return element;
-// 			}
-// 		});
-// 	}
-
-// 	if (query.limit) {
-// 		query.limit =
-// 			query.limit > filtered.length ? filtered.length : query.limit;
-// 		const temp = [];
-// 		for (let i = 0; i < Number(query.limit); i++) {
-// 			temp.push(filtered[i]);
-// 		}
-// 		filtered = temp;
-// 	}
-// 	const temp = [];
-// 	for (const item of filtered) {
-// 		temp.push({
-// 			description: item.description,
-// 			duration: item.duration,
-// 			date: new Date(item.date).toDateString(),
-// 		});
-// 	}
-// 	filtered = temp;
-// 	// const object = {
-// 	//   _id: mongoose.Types.ObjectId(user._id),
-// 	//   username: user.username,
-// 	//   count: filtered.length,
-// 	//   log: filtered,
-// 	// };
-
-// 	const object = {};
-// 	object["_id"] = mongoose.Types.ObjectId(user._id);
-// 	object["username"] = user.username;
-// 	object["count"] = filtered.length;
-// 	object["log"] = filtered;
-
-// 	return res.status(200).json(object);
-// });
-
-app.get("/api/exercise/log", (request, response) => {
-	User.findById(request.query.userId, (error, result) => {
-		if (!error) {
-			let responseObject = result;
-
-			if (request.query.from || request.query.to) {
-				let fromDate = new Date(0);
-				let toDate = new Date();
-
-				if (request.query.from) {
-					fromDate = new Date(request.query.from);
-				}
-
-				if (request.query.to) {
-					toDate = new Date(request.query.to);
-				}
-
-				fromDate = fromDate.getTime();
-				toDate = toDate.getTime();
-
-				responseObject.log = responseObject.log.filter((session) => {
-					let sessionDate = new Date(session.date).getTime();
-
-					return sessionDate >= fromDate && sessionDate <= toDate;
-				});
-			}
-
-			if (request.query.limit) {
-				responseObject.log = responseObject.log.slice(
-					0,
-					request.query.limit
-				);
-			}
-
-			responseObject = responseObject.toJSON();
-			responseObject["count"] = result.log.length;
-			response.json(responseObject);
-		}
+	filtered.sort(function (a, b) {
+		let dateA = a.date,
+			dateB = b.date;
+		return dateA - dateB;
 	});
+
+	if (!query.userId) {
+		return res.status(400).send("userId required");
+	}
+
+	if (query.to) {
+		filtered = filtered.filter((element) => {
+			if (element.date <= new Date(query.to)) {
+				return element;
+			}
+		});
+	}
+	if (query.from) {
+		filtered = filtered.filter((element) => {
+			if (element.date >= new Date(query.from)) {
+				return element;
+			}
+		});
+	}
+
+	if (query.limit) {
+		query.limit =
+			query.limit > filtered.length ? filtered.length : query.limit;
+		const temp = [];
+		for (let i = 0; i < Number(query.limit); i++) {
+			temp.push(filtered[i]);
+		}
+		filtered = temp;
+	}
+	const temp = [];
+	for (const item of filtered) {
+		temp.push({
+			description: item.description,
+			duration: item.duration,
+			date: item.date.toDateString(),
+		});
+	}
+	filtered = temp;
+	const object = {
+		_id: mongoose.Types.ObjectId(user._id),
+		username: user.username,
+		count: filtered.length,
+		log: filtered,
+	};
+	return res.status(200).json(object);
 });
 
 //------------------------------App-Listen---------------------------------------------
