@@ -149,14 +149,14 @@ app.get("/api/exercise/log", async (req, res) => {
 
   if (query.to) {
     filtered = filtered.filter((element) => {
-      if (element.date < new Date(query.to)) {
+      if (element.date <= new Date(query.to)) {
         return element;
       }
     });
   }
   if (query.from) {
     filtered = filtered.filter((element) => {
-      if (element.date > new Date(query.from)) {
+      if (element.date >= new Date(query.from)) {
         return element;
       }
     });
