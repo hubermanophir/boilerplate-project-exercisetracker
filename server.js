@@ -74,7 +74,7 @@ app.post("/api/exercise/new-user", async (req, res) => {
   }
 });
 
-//Get a specific user
+//Get all users
 app.get("/api/exercise/users", async (req, res) => {
   let userArray;
   try {
