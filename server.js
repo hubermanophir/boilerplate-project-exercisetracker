@@ -26,7 +26,8 @@ mongoose
       useFindAndModify: false,
     }
   )
-  .then(() => console.log("Connected Successfully to Mongoose atlas"));
+  .then(() => console.log("Connected Successfully to Mongoose atlas"))
+  .catch((err) => console.log(err));
 
 //-------------------------------------Routes---------------------------------------------
 
@@ -39,11 +40,16 @@ app.get("/", (req, res) => {
 app.post("/api/exercise/new-user", async (req, res) => {
   const body = req.body;
   const userName = body.username;
+  if (userName === "") {
+    return res.status(400).send("Username cannot be empty");
+  }
   let user;
   try {
     user = await User.find({ username: userName });
   } catch (err) {
-    return res.status(500).send("Internal server error");
+    return res
+      .status(500)
+      .send("Internal server error could not find user" + err);
   }
   if (user[0] === undefined) {
     const newUser = new User({
@@ -53,7 +59,7 @@ app.post("/api/exercise/new-user", async (req, res) => {
     try {
       await newUser.save();
     } catch (err) {
-      return res.status(500).send("Internal server error");
+      return res.status(500).send("Internal server error" + err);
     }
     const id = newUser._id;
     const username = newUser.username;
@@ -64,7 +70,7 @@ app.post("/api/exercise/new-user", async (req, res) => {
     console.log(obj.username);
     res.json(obj);
   } else {
-    res.status(400).send("Username already taken");
+    return res.status(400).send("Username already taken");
   }
 });
 
@@ -74,7 +80,9 @@ app.get("/api/exercise/users", async (req, res) => {
   try {
     userArray = await User.find({});
   } catch (err) {
-    return res.status(500).send("Internal server error");
+    return res
+      .status(500)
+      .send("Internal server error, could not get users" + err);
   }
   res.json(userArray);
 });
@@ -103,7 +111,9 @@ app.post("/api/exercise/add", async (req, res) => {
   try {
     user = await User.findById(body.userId);
   } catch (err) {
-    return res.status(500).send("Internal server error");
+    return res
+      .status(500)
+      .send("Internal server error, could not find user" + err);
   }
   const id = user._id;
   outputObject.username = user.username;
