@@ -88,41 +88,78 @@ app.get("/api/exercise/users", async (req, res) => {
 });
 
 //Adding a new exercise to a user
-app.post("/api/exercise/add", async (req, res) => {
-	const body = req.body;
-	const exercise = {};
-	const outputObject = {};
-	if (body.date === "") {
-		exercise.date = new Date();
-	} else {
-		exercise.date = new Date(body.date);
-	}
-	exercise.duration = body.duration;
-	exercise.description = body.description;
-	try {
-		await User.findByIdAndUpdate(body.userId, {
-			$push: { log: exercise },
-			$inc: { count: 1 },
+// app.post("/api/exercise/add", async (req, res) => {
+// 	const body = req.body;
+// 	const exercise = {};
+// 	const outputObject = {};
+// 	if (body.date === "") {
+// 		exercise.date = new Date();
+// 	} else {
+// 		exercise.date = new Date(body.date);
+// 	}
+// 	exercise.duration = body.duration;
+// 	exercise.description = body.description;
+// 	try {
+// 		await User.findByIdAndUpdate(body.userId, {
+// 			$push: { log: exercise },
+// 			$inc: { count: 1 },
+// 		});
+// 	} catch (err) {
+// 		return res.status(500).send("Internal server error");
+// 	}
+// 	let user;
+// 	try {
+// 		user = await User.findById(body.userId);
+// 	} catch (err) {
+// 		return res
+// 			.status(500)
+// 			.send("Internal server error, could not find user" + err);
+// 	}
+// 	const id = user._id;
+// 	outputObject.username = user.username;
+// 	outputObject.description = exercise.description;
+// 	outputObject.duration = Number(exercise.duration);
+// 	outputObject._id = mongoose.Types.ObjectId(id);
+// 	outputObject.date = exercise.date.toDateString();
+// 	res.json(outputObject);
+// });
+
+app.post(
+	"/api/exercise/add",
+	bodyParser.urlencoded({ extended: false }),
+	(request, response) => {
+		let newSession = new Session({
+			description: request.body.description,
+			duration: parseInt(request.body.duration),
+			date: request.body.date,
 		});
-	} catch (err) {
-		return res.status(500).send("Internal server error");
+
+		if (newSession.date === "") {
+			newSession.date = new Date().toISOString().substring(0, 10);
+		}
+
+		User.findByIdAndUpdate(
+			request.body.userId,
+			{ $push: { log: newSession } },
+			{ new: true },
+			(error, updatedUser) => {
+				if (!error) {
+					let responseObject = {};
+					responseObject["_id"] = updatedUser.id;
+					responseObject["username"] = updatedUser.username;
+					responseObject["date"] = new Date(
+						newSession.date
+					).toDateString();
+					responseObject["description"] = newSession.description;
+					responseObject["duration"] = newSession.duration;
+					response.json(responseObject);
+				}
+			}
+		);
 	}
-	let user;
-	try {
-		user = await User.findById(body.userId);
-	} catch (err) {
-		return res
-			.status(500)
-			.send("Internal server error, could not find user" + err);
-	}
-	const id = user._id;
-	outputObject.username = user.username;
-	outputObject.description = exercise.description;
-	outputObject.duration = Number(exercise.duration);
-	outputObject._id = mongoose.Types.ObjectId(id);
-	outputObject.date = exercise.date.toDateString();
-	res.json(outputObject);
-});
+);
+
+//----------------------------------------------------
 
 //Getting the user and all his exercises
 // app.get("/api/exercise/log", async (req, res) => {
